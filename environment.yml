@@ -1,9 +1,0 @@
-#
-# IMPORTANT: this must be the same env as xcube-server/environment.yml until we've merged xcube-server into this repo
-#
-name: xcube-gen-bins
-
-dependencies:
-  - xcube
-
-

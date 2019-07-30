@@ -23,11 +23,17 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
+  - git clone https://github.com/dcs4cop/xcube.git
+  - cd xcube
   - conda env create --file environment.yml
   - conda init bash
   - source activate xcube
   - conda list
-  - python setup.py install 
+  - python setup.py install
+  - cd ..
+  - git clone https://github.com/dcs4cop/xcube-gen-bc.git
+  - cd xcube-gen-bc
+  - python setup.py install
   
   - pytest
   - py.test -v --cov=xcube
