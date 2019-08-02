@@ -26,7 +26,7 @@ import numpy as np
 import xarray as xr
 
 from xcube.util.constants import CRS_WKT_EPSG_4326
-from xcube.util.timecoord import get_time_in_days_since_1970
+from xcube.util.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import vectorize_wavebands, new_band_coord_var
 from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo, register_input_processor
@@ -61,8 +61,8 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
             t2 = dataset.attrs.get('stop_date', t1)
         if t1 is None or t2 is None:
             raise ValueError('illegal L2 input: missing start/stop time')
-        t1 = get_time_in_days_since_1970(t1)
-        t2 = get_time_in_days_since_1970(t2)
+        t1 = to_time_in_days_since_1970(t1)
+        t2 = to_time_in_days_since_1970(t2)
         return t1, t2
 
     def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
