@@ -28,8 +28,19 @@ import xarray as xr
 Token = collections.namedtuple('Token', ['kind', 'value'])
 
 _TOKEN_REGEX = None
-_KW_MAPPINGS = {'NOT': 'not', 'AND': 'and', 'OR': 'or', 'true': 'True', 'false': 'False', 'NaN': 'NaN'}
-_OP_MAPPINGS = {'?': 'if', ':': 'else', '!': 'not', '&&': 'and', '||': 'or'}
+_KW_MAPPINGS = {'NOT': 'not',
+                'AND': 'and',
+                'OR': 'or',
+                'true': 'True',
+                'false': 'False',
+                'NaN': 'NaN',
+                'nan': 'isnan'}
+_OP_MAPPINGS = {'?': 'if',
+                ':': 'else',
+                '!': 'not',
+                '&&': 'and',
+                '||': 'or',
+                '^': '**'}
 
 
 def translate_snap_expr_attributes(dataset: xr.Dataset) -> xr.Dataset:
@@ -76,6 +87,7 @@ def translate_snap_expr(snap_expr: str) -> str:
             if last_kind == 'ID' or last_kind == 'KW' or last_kind == 'NUM':
                 py_expr += ' '
         elif kind == 'OP':
+            value = _OP_MAPPINGS.get(value, value)
             if last_kind == 'OP':
                 py_expr += ' '
         elif kind == 'PAR':
@@ -105,7 +117,7 @@ def tokenize_expr(expr: str) -> Generator[Token, None, None]:
                 #    a ? b : c  --> a if b else c --> b if a else c
                 #
                 kw = _OP_MAPPINGS.get(value)
-                if kw is not None:
+                if kw is not None and kw.isidentifier():
                     kind = 'KW'
                     value = kw
             yield Token(kind, value)
