@@ -19,6 +19,8 @@ class TranslateExprTest(unittest.TestCase):
         self.assertEqual(translate_snap_expr('a || b'), 'a or b')
         self.assertEqual(translate_snap_expr('a & b'), 'a&b')
         self.assertEqual(translate_snap_expr('a | b'), 'a|b')
+        self.assertEqual(translate_snap_expr('!nan(kd489)'), 'not isnan(kd489)')
+        self.assertEqual(translate_snap_expr('sqrt(x^2 + y^2)'), 'sqrt(x**2+y**2)')
 
 
 class TokenizeExprTest(unittest.TestCase):
@@ -57,6 +59,10 @@ class TokenizeExprTest(unittest.TestCase):
                           Token('OP', '!='),
                           Token('NUM', '3'),
                           Token('PAR', ')')])
+        self.assertEqual(list(tokenize_expr('a ^ b')),
+                         [Token('ID', 'a'),
+                          Token('OP', '^'),
+                          Token('ID', 'b')])
 
     def test_conditional(self):
         self.assertEqual(list(tokenize_expr('a >= 0.0 ? a : NaN')),
