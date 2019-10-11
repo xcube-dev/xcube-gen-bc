@@ -1,6 +1,6 @@
 import os
 import unittest
-
+import xarray as xr
 from xcube.api.gen.gen import gen_cube
 from xcube.util.dsio import rimraf
 from test.helpers import get_inputdata_file
@@ -66,6 +66,15 @@ class SnapProcessTest(unittest.TestCase):
                                         append_mode=True)
         self.assertEqual(True, status)
 
+    def test_correct_times_in_cube(self):
+        status = process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
+                                        output_path='l2c.zarr',
+                                        output_writer='zarr',
+                                        append_mode=True)
+        self.assertEqual(True, status)
+        ds = xr.open_zarr('l2c.zarr')
+        self.assertEqual(f"['2017-04-14T10:27:39.819000320' '2017-04-15T10:01:37.405000192'\n "
+                         f"'2017-04-15T10:01:57.892000256']", str(ds.time.values))
 
 # noinspection PyShadowingBuiltins
 def process_inputs_wrapper(input_path=None,
