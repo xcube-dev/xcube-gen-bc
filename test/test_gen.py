@@ -1,5 +1,7 @@
 import os
 import unittest
+from io import StringIO
+from unittest.mock import patch
 
 from xcube.api.gen.gen import gen_cube
 from xcube.util.dsio import rimraf
@@ -39,25 +41,13 @@ class SnapProcessTest(unittest.TestCase):
         self.assertEqual(True, status)
 
     def test_process_inputs_insert_multiple_nc(self):
-        status = process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
-                                        output_path='l2c.nc',
-                                        output_writer='netcdf4',
-                                        append_mode=True)
-        self.assertEqual(False, status)
-
-    # def test_not_implemented_insert_nc_cube(self):
-    #      with self.assertRaises(NotImplementedError):
-    #         gen_cube(input_paths=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
-    #                  input_processor_name='snap-olci-highroc-l2',
-    #                  output_region=(0., 50., 5., 52.5),
-    #                  output_size=(2000, 1000),
-    #                  output_resampling='Nearest',
-    #                  output_path='l2c.nc',
-    #                  output_writer_name='netcdf4',
-    #                  output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)],
-    #                  append_mode=True,
-    #                  dry_run=False,
-    #                  monitor=None)
+        with patch('sys.stdout', new=StringIO()) as output:
+            process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
+                                   output_path='l2c.nc',
+                                   output_writer='netcdf4',
+                                   append_mode=True, monitor=print)
+            self.assertEqual(output.getvalue()[-69:],
+                             '2 of 3 datasets processed successfully, 1 were dropped due to errors\n')
 
     def test_process_inputs_append_multiple_zarr(self):
         status = process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
@@ -71,10 +61,11 @@ class SnapProcessTest(unittest.TestCase):
 def process_inputs_wrapper(input_path=None,
                            output_path=None,
                            output_writer='netcdf4',
-                           append_mode=False):
+                           append_mode=False,
+                           monitor=None):
     return gen_cube(input_paths=input_path, input_processor_name='snap-olci-highroc-l2',
                     output_region=(0., 50., 5., 52.5),
                     output_size=(2000, 1000), output_resampling='Nearest', output_path=output_path,
                     output_writer_name=output_writer,
                     output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)], append_mode=append_mode,
-                    dry_run=False, monitor=None)
+                    dry_run=False, monitor=monitor)
