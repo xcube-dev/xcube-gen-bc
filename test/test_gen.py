@@ -47,7 +47,7 @@ class SnapProcessTest(unittest.TestCase):
                                    output_writer='netcdf4',
                                    append_mode=True, monitor=print)
             self.assertEqual(output.getvalue()[-69:],
-                             '2 of 3 datasets processed successfully, 1 were dropped due to errors\n')
+                             '3 of 3 datasets processed successfully, 0 were dropped due to errors\n')
 
     def test_process_inputs_append_multiple_zarr(self):
         status = process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],

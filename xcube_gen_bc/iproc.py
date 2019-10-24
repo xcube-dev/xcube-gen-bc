@@ -24,18 +24,21 @@ from typing import Tuple
 
 import numpy as np
 import xarray as xr
-
+from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo, register_input_processor
 from xcube.util.constants import CRS_WKT_EPSG_4326
 from xcube.util.timecoord import to_time_in_days_since_1970
+
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import vectorize_wavebands, new_band_coord_var
-from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo, register_input_processor
 
 
 class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     """
     Input processor for SNAP L2 NetCDF inputs.
     """
+
+    def __init__(self):
+        self.xy_gcp_step = None
 
     @property
     def input_reader(self) -> str:
@@ -45,11 +48,22 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     def input_reader_params(self) -> dict:
         return dict(decode_cf=True, decode_coords=True, decode_times=False)
 
+    def configure(self, **parameters):
+        if 'xy_gcp_step' in parameters:
+            xy_gcp_step = parameters.pop('xy_gcp_step')
+            if xy_gcp_step is not None:
+                if not isinstance(xy_gcp_step, int):
+                    raise ValueError("input processor parameter 'xy_gcp_step' must be an integer number")
+                if xy_gcp_step <= 0:
+                    raise ValueError("input processor parameter 'xy_gcp_step' must be greater than zero")
+            self.xy_gcp_step = xy_gcp_step
+        super().configure(**parameters)
+
     def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
         return ReprojectionInfo(xy_var_names=('lon', 'lat'),
                                 xy_tp_var_names=('TP_longitude', 'TP_latitude'),
                                 xy_crs=CRS_WKT_EPSG_4326,
-                                xy_gcp_step=5)
+                                xy_gcp_step=self.xy_gcp_step or 5)
 
     def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
 
