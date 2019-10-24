@@ -45,7 +45,7 @@ class SnapProcessTest(unittest.TestCase):
             process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_*_v1.0.nc')],
                                    output_path='l2c.nc',
                                    output_writer='netcdf4',
-                                   append_mode=True, monitor=print)
+                                   append_mode=True, monitor=print, sort_mode=True)
             self.assertEqual(output.getvalue()[-69:],
                              '3 of 3 datasets processed successfully, 0 were dropped due to errors\n')
 
@@ -62,10 +62,11 @@ def process_inputs_wrapper(input_path=None,
                            output_path=None,
                            output_writer='netcdf4',
                            append_mode=False,
+                           sort_mode=False,
                            monitor=None):
     return gen_cube(input_paths=input_path, input_processor_name='snap-olci-highroc-l2',
                     output_region=(0., 50., 5., 52.5),
                     output_size=(2000, 1000), output_resampling='Nearest', output_path=output_path,
                     output_writer_name=output_writer,
                     output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)], append_mode=append_mode,
-                    dry_run=False, monitor=monitor)
+                    sort_mode=sort_mode, dry_run=False, monitor=monitor)
