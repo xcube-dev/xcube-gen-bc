@@ -19,10 +19,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-def init_plugin(ext_registry: 'xcube.api.ExtensionRegistry'):
-    ext_registry.add_ext_lazy(_input_processor_1, 'iproc', 'snap-olci-highroc-l2')
-    ext_registry.add_ext_lazy(_input_processor_2, 'iproc', 'snap-olci-cyanoalert-l2')
+def init_plugin(ext_registry: 'xcube.util.ext.ExtensionRegistry'):
+    ext_registry.add_ext_lazy(_input_processor_1,
+                              'xcube.core.gen.iproc', 'snap-olci-highroc-l2')
+    ext_registry.add_ext_lazy(_input_processor_2,
+                              'xcube.core.gen.iproc', 'snap-olci-cyanoalert-l2')
 
 
 def _input_processor_1():
