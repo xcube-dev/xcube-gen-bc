@@ -24,7 +24,7 @@ from typing import Tuple
 
 import numpy as np
 import xarray as xr
-from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo, register_input_processor
+from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo
 from xcube.util.constants import CRS_WKT_EPSG_4326
 from xcube.util.timecoord import to_time_in_days_since_1970
 
@@ -121,9 +121,3 @@ class SnapOlciCyanoAlertL2InputProcessor(SnapNetcdfInputProcessor):
     @property
     def description(self) -> str:
         return 'SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
-
-
-def init_plugin():
-    """ Register a DatasetIO object: SnapOlciHighrocL2NetcdfInputProcessor() """
-    register_input_processor(SnapOlciHighrocL2InputProcessor())
-    register_input_processor(SnapOlciCyanoAlertL2InputProcessor())
