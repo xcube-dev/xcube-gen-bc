@@ -19,18 +19,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-def init_plugin(ext_registry: 'xcube.util.ext.ExtensionRegistry'):
-    ext_registry.add_ext_lazy(_input_processor_1,
-                              'xcube.core.gen.iproc', 'snap-olci-highroc-l2')
-    ext_registry.add_ext_lazy(_input_processor_2,
-                              'xcube.core.gen.iproc', 'snap-olci-cyanoalert-l2')
+from xcube.util import extension
 
 
-def _input_processor_1():
-    from .iproc import SnapOlciHighrocL2InputProcessor
-    return SnapOlciHighrocL2InputProcessor()
-
-
-def _input_processor_2():
-    from .iproc import SnapOlciCyanoAlertL2InputProcessor
-    return SnapOlciCyanoAlertL2InputProcessor()
+def init_plugin(ext_registry: extension.ExtensionRegistry):
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciHighrocL2InputProcessor', call=True),
+        point='xcube.core.gen.iproc', name='snap-olci-highroc-l2',
+        description='SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs'
+    )
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciCyanoAlertL2InputProcessor', call=True),
+        point='xcube.core.gen.iproc', name='snap-olci-cyanoalert-l2',
+        description='SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
+    )
