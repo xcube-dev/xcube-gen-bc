@@ -25,7 +25,7 @@ from typing import Tuple
 import numpy as np
 import xarray as xr
 
-from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo
+from xcube.core.gen.iproc import XYInputProcessor, ReprojectionInfo
 from xcube.util.constants import CRS_WKT_EPSG_4326
 from xcube.util.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
