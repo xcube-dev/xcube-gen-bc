@@ -83,14 +83,14 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
 
-    def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
-        def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
-            # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
-            if band_values[-2] == band_values[-1] and band_values[-1] == 940.:
-                band_values[-1] = 1020.
-            return new_band_coord_var(band_dim_name, band_values)
-
-        return vectorize_wavebands(dataset, new_band_coord_var_ex)
+    # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
+    #     def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
+    #         # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
+    #         if band_values[-2] == band_values[-1] and band_values[-1] == 940.:
+    #             band_values[-1] = 1020.
+    #         return new_band_coord_var(band_dim_name, band_values)
+    #
+    #     return vectorize_wavebands(dataset, new_band_coord_var_ex)
 
 
 # noinspection PyAbstractClass
