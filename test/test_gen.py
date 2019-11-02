@@ -4,7 +4,7 @@ from io import StringIO
 from unittest.mock import patch
 
 from xcube.core.gen.gen import gen_cube
-from xcube.util.dsio import rimraf
+from xcube.core.dsio import rimraf
 from test.helpers import get_inputdata_file
 
 
