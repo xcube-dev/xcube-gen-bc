@@ -18,18 +18,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+import datetime
 from abc import ABCMeta
 from typing import Tuple
 
 import numpy as np
 import xarray as xr
-from xcube.api.gen.iproc import XYInputProcessor, ReprojectionInfo, register_input_processor
+from xcube.api.gen.default.iproc import _normalize_lon_360
+from xcube.api.gen.iproc import ReprojectionInfo, XYInputProcessor, register_input_processor
 from xcube.util.constants import CRS_WKT_EPSG_4326
 from xcube.util.timecoord import to_time_in_days_since_1970
 
 from .transexpr import translate_snap_expr_attributes
-from .vectorize import vectorize_wavebands, new_band_coord_var
+from .vectorize import new_band_coord_var, vectorize_wavebands
 
 
 class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
@@ -123,7 +124,105 @@ class SnapOlciCyanoAlertL2InputProcessor(SnapNetcdfInputProcessor):
         return 'SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
 
 
+class CMEMSInputProcessor(XYInputProcessor):
+    """
+    CEMES input processor that expects input datasets that do not have time bounds:
+
+    * Have dimensions ``lat``, ``lon`` and``time`` of length 1;
+    * have coordinate variables ``lat[lat]``, ``lon[lat]``, ``time[time]`` ;
+    * have coordinate variables ``lat[lat]``, ``lon[lat]`` as decimal degrees on WGS84 ellipsoid,
+      both linearly increasing with same constant delta;
+    * have coordinate variable ``time[time]`` representing a date+time value object in cftime.DatetimeGregorian;
+    * have any data variables of form ``<var>[time, lat, lon]``;
+
+    The CMEMS input processor can be configured by the following parameters:
+
+    * ``input_reader`` the input reader identifier, default is "netcdf4".
+
+    """
+
+    def __init__(self):
+        self._input_reader = 'netcdf4'
+
+    @property
+    def name(self) -> str:
+        return 'cmems'
+
+    @property
+    def description(self) -> str:
+        return 'Single-scene CMEMS NetCDF/CF inputs in with time object in cftime.DatetimeGregorian'
+
+    def configure(self, input_reader: str = 'netcdf4'):
+        self._input_reader = input_reader
+
+    @property
+    def input_reader(self) -> str:
+        return self._input_reader
+
+    def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
+        self._validate(dataset)
+
+        if "time" in dataset:
+            # Remove time dimension of length 1.
+            dataset = dataset.squeeze("time")
+
+        return _normalize_lon_360(dataset)
+
+    def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
+        return ReprojectionInfo(xy_var_names=('lon', 'lat'),
+                                xy_crs=CRS_WKT_EPSG_4326,
+                                xy_gcp_step=(max(1, len(dataset.lon) // 4),
+                                             max(1, len(dataset.lat) // 4)))
+
+    def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
+        time_coverage_start, time_coverage_end = None, None
+        if "time" in dataset:
+            time_coverage_start = str(dataset.time[0].values)
+            date_format = '%Y-%m-%d %H:%M:%S'
+            date = datetime.datetime.strptime(str(dataset.time[0].values), date_format)
+            time_coverage_end = datetime.datetime.strftime((date + datetime.timedelta(days=1)), date_format)
+
+        return to_time_in_days_since_1970(time_coverage_start), to_time_in_days_since_1970(time_coverage_end)
+
+    def _validate(self, dataset):
+        self._check_coordinate_var(dataset, "lon", min_length=2)
+        self._check_coordinate_var(dataset, "lat", min_length=2)
+        if "time" in dataset.dims:
+            self._check_coordinate_var(dataset, "time", max_length=1)
+            required_dims = ("time", "lat", "lon")
+        else:
+            required_dims = ("lat", "lon")
+        count = 0
+        for var_name in dataset.data_vars:
+            var = dataset.data_vars[var_name]
+            if var.dims == required_dims:
+                count += 1
+        if count == 0:
+            raise ValueError(f"dataset has no variables with required dimensions {required_dims!r}")
+
+    # noinspection PyMethodMayBeStatic
+    def _check_coordinate_var(self, dataset: xr.Dataset, coord_var_name: str,
+                              min_length: int = None, max_length: int = None):
+        if coord_var_name not in dataset.coords:
+            raise ValueError(f'missing coordinate variable "{coord_var_name}"')
+        coord_var = dataset.coords[coord_var_name]
+        if len(coord_var.shape) != 1:
+            raise ValueError('coordinate variable "lon" must be 1D')
+        coord_var_bnds_name = coord_var.attrs.get("bounds", coord_var_name + "_bnds")
+        if coord_var_bnds_name in dataset:
+            coord_bnds_var = dataset[coord_var_bnds_name]
+            expected_shape = (len(coord_var), 2)
+            if coord_bnds_var.shape != expected_shape:
+                raise ValueError(f'coordinate bounds variable "{coord_bnds_var}" must have shape {expected_shape!r}')
+        else:
+            if min_length is not None and len(coord_var) < min_length:
+                raise ValueError(f'coordinate variable "{coord_var_name}" must have at least {min_length} value(s)')
+            if max_length is not None and len(coord_var) > max_length:
+                raise ValueError(f'coordinate variable "{coord_var_name}" must have no more than {max_length} value(s)')
+
+
 def init_plugin():
     """ Register a DatasetIO object: SnapOlciHighrocL2NetcdfInputProcessor() """
+    register_input_processor(CMEMSInputProcessor())
     register_input_processor(SnapOlciHighrocL2InputProcessor())
     register_input_processor(SnapOlciCyanoAlertL2InputProcessor())
