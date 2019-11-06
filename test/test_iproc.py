@@ -85,6 +85,6 @@ class CMEMSInputProcessorTest(unittest.TestCase):
 
     def test_props(self):
         self.assertEqual('cmems', self.processor.name)
-        self.assertEqual('Single-scene CMEMS NetCDF/CF inputs in with time object in cftime.DatetimeGregorian',
+        self.assertEqual('Single-scene daily or hourly CMEMS NetCDF/CF inputs',
                          self.processor.description)
         self.assertEqual('netcdf4', self.processor.input_reader)

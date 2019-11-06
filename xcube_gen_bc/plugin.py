@@ -40,5 +40,5 @@ def init_plugin(ext_registry: extension.ExtensionRegistry):
         loader=extension.import_component('xcube_gen_bc.iproc:CMEMSInputProcessor', call=True),
         point=EXTENSION_POINT_INPUT_PROCESSORS,
         name='cmems',
-        description='Single-scene CMEMS NetCDF/CF inputs.'
+        description='Single-scene daily or hourly CMEMS NetCDF/CF inputs'
     )
