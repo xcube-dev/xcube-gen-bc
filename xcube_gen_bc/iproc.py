@@ -23,11 +23,12 @@ from abc import ABCMeta
 from typing import Tuple
 
 import numpy as np
+import pandas as pd
 import xarray as xr
-
 from xcube.constants import CRS_WKT_EPSG_4326
-from xcube.core.gen.iproc import XYInputProcessor, ReprojectionInfo
+from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360
 from xcube.core.timecoord import to_time_in_days_since_1970
+
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import new_band_coord_var, vectorize_wavebands
 
@@ -112,13 +113,6 @@ class SnapOlciCyanoAlertL2InputProcessor(SnapNetcdfInputProcessor):
 
     def __init__(self):
         super().__init__('snap-olci-cyanoalert-l2')
-    @property
-    def name(self) -> str:
-        return 'snap-olci-cyanoalert-l2'
-
-    @property
-    def description(self) -> str:
-        return 'SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
 
 
 class CMEMSInputProcessor(XYInputProcessor):
@@ -139,15 +133,8 @@ class CMEMSInputProcessor(XYInputProcessor):
     """
 
     def __init__(self):
+        super().__init__('cmems')
         self._input_reader = 'netcdf4'
-
-    @property
-    def name(self) -> str:
-        return 'cmems'
-
-    @property
-    def description(self) -> str:
-        return 'Single-scene CMEMS NetCDF/CF inputs in with time object in cftime.DatetimeGregorian'
 
     def configure(self, input_reader: str = 'netcdf4'):
         self._input_reader = input_reader
@@ -157,6 +144,12 @@ class CMEMSInputProcessor(XYInputProcessor):
         return self._input_reader
 
     def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
+        if 'longitude' in dataset.dims:
+            dataset = dataset.rename(({'longitude': 'lon'}))
+
+        if 'latitude' in dataset.dims:
+            dataset = dataset.rename(({'latitude': 'lat'}))
+
         self._validate(dataset)
 
         if "time" in dataset:
@@ -173,11 +166,14 @@ class CMEMSInputProcessor(XYInputProcessor):
 
     def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
         time_coverage_start, time_coverage_end = None, None
+        date_format = '%Y-%m-%d %H:%M:%S'
         if "time" in dataset:
             time_coverage_start = str(dataset.time[0].values)
-            date_format = '%Y-%m-%d %H:%M:%S'
-            date = datetime.datetime.strptime(str(dataset.time[0].values), date_format)
-            time_coverage_end = datetime.datetime.strftime((date + datetime.timedelta(days=1)), date_format)
+            date = pd.to_datetime(str(dataset.time[0].values), utc=True)
+            if 'daily' in str(dataset.attrs.values()):
+                time_coverage_end = datetime.datetime.strftime((date + datetime.timedelta(days=1)), date_format)
+            if 'hourly' in str(dataset.attrs.values()):
+                time_coverage_end = datetime.datetime.strftime((date + datetime.timedelta(hours=1)), date_format)
 
         return to_time_in_days_since_1970(time_coverage_start), to_time_in_days_since_1970(time_coverage_end)
 

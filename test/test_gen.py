@@ -3,8 +3,10 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-from xcube.core.gen.gen import gen_cube
+import xarray as xr
 from xcube.core.dsio import rimraf
+from xcube.core.gen.gen import gen_cube
+
 from test.helpers import get_inputdata_file
 
 
@@ -60,7 +62,7 @@ class SnapProcessTest(unittest.TestCase):
                                         append_mode=True)
         self.assertEqual(True, status)
 
-    def test_process_inputs_cmems_nc(self):
+    def test_process_inputs_cmems_daily_nc(self):
         status = process_inputs_wrapper(
             input_path=[get_inputdata_file('OCEANCOLOUR_ATL_CHL_L4_REP_OBSERVATIONS_009_098-TDS-2017-11-10.nc')],
             input_processor_name='cmems',
@@ -72,6 +74,21 @@ class SnapProcessTest(unittest.TestCase):
         self.assertEqual('2017-11-10T12:00:00.000000000', str(ds.time[0].values))
         self.assertEqual('2017-11-11T00:00:00.000000000', ds.attrs['time_coverage_end'])
         self.assertEqual('2017-11-10T00:00:00.000000000', ds.attrs['time_coverage_start'])
+
+    def test_process_inputs_cmems_hourly_nc(self):
+        status = process_inputs_wrapper(
+            input_path=[get_inputdata_file('NORTHWESTSHELF_ANALYSIS_FORECAST_WAV_004_014-TDS-2019-08-21-15.nc')],
+            input_processor_name='cmems',
+            output_path='l2c.zarr',
+            output_writer='zarr',
+            append_mode=True)
+        self.assertEqual(True, status)
+        ds = xr.open_zarr('l2c.zarr')
+        self.assertEqual('2019-08-21T15:30:00.000000000', str(ds.time[0].values))
+        self.assertEqual('2019-08-21T16:00:00.000000000', ds.attrs['time_coverage_end'])
+        self.assertEqual('2019-08-21T15:00:00.000000000', ds.attrs['time_coverage_start'])
+        self.assertIn('lon', ds.dims)
+        self.assertIn('lat', ds.dims)
 
 
 # noinspection PyShadowingBuiltins
