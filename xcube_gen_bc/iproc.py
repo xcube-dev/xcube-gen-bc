@@ -24,11 +24,10 @@ from typing import Tuple
 
 import numpy as np
 import xarray as xr
-from xcube.api.gen.default.iproc import _normalize_lon_360
-from xcube.api.gen.iproc import ReprojectionInfo, XYInputProcessor, register_input_processor
-from xcube.util.constants import CRS_WKT_EPSG_4326
-from xcube.util.timecoord import to_time_in_days_since_1970
 
+from xcube.constants import CRS_WKT_EPSG_4326
+from xcube.core.gen.iproc import XYInputProcessor, ReprojectionInfo
+from xcube.core.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import new_band_coord_var, vectorize_wavebands
 
@@ -38,7 +37,8 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     Input processor for SNAP L2 NetCDF inputs.
     """
 
-    def __init__(self):
+    def __init__(self, name: str):
+        super().__init__(name)
         self.xy_gcp_step = None
 
     @property
@@ -100,21 +100,18 @@ class SnapOlciHighrocL2InputProcessor(SnapNetcdfInputProcessor):
     Input processor for SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs.
     """
 
-    @property
-    def name(self) -> str:
-        return 'snap-olci-highroc-l2'
-
-    @property
-    def description(self) -> str:
-        return 'SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs'
+    def __init__(self):
+        super().__init__('snap-olci-highroc-l2')
 
 
 # noinspection PyAbstractClass
 class SnapOlciCyanoAlertL2InputProcessor(SnapNetcdfInputProcessor):
     """
-    Input processor for SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs.
+    Input processor for SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs.
     """
 
+    def __init__(self):
+        super().__init__('snap-olci-cyanoalert-l2')
     @property
     def name(self) -> str:
         return 'snap-olci-cyanoalert-l2'

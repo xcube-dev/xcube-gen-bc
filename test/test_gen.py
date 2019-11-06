@@ -3,10 +3,8 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-import xarray as xr
-from xcube.api.gen.gen import gen_cube
-from xcube.util.dsio import rimraf
-
+from xcube.core.gen.gen import gen_cube
+from xcube.core.dsio import rimraf
 from test.helpers import get_inputdata_file
 
 
