@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 from abc import ABCMeta
-from typing import Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 import xarray as xr
@@ -48,15 +48,6 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     @property
     def input_reader_params(self) -> dict:
         return dict(decode_cf=True, decode_coords=True, decode_times=False)
-
-    def get_time_for_sorting(self, dataset: xr.Dataset) -> Optional[str]:
-        if "time_coverage_start" in dataset.attrs:
-            time_string = str(dataset.attrs["time_coverage_start"])
-        else:
-            time_string = dataset.attrs.get('start_date')
-        if time_string is None:
-            raise ValueError('illegal L2 input: missing start/stop time')
-        return time_string
 
     def configure(self, **parameters):
         if 'xy_gcp_step' in parameters:
