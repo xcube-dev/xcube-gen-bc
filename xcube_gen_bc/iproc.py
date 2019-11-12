@@ -119,7 +119,7 @@ class CMEMSInputProcessor(XYInputProcessor):
     """
     CEMES input processor that expects input datasets that do not have time bounds:
 
-    * Have dimensions ``lat``, ``lon`` and``time`` of length 1;
+    * Have dimensions ``lat``, ``lon`` and ``time`` of length 1;
     * have coordinate variables ``lat[lat]``, ``lon[lat]``, ``time[time]`` ;
     * have coordinate variables ``lat[lat]``, ``lon[lat]`` as decimal degrees on WGS84 ellipsoid,
       both linearly increasing with same constant delta;
