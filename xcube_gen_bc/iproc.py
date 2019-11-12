@@ -212,10 +212,3 @@ class CMEMSInputProcessor(XYInputProcessor):
                 raise ValueError(f'coordinate variable "{coord_var_name}" must have at least {min_length} value(s)')
             if max_length is not None and len(coord_var) > max_length:
                 raise ValueError(f'coordinate variable "{coord_var_name}" must have no more than {max_length} value(s)')
-
-
-def init_plugin():
-    """ Register a DatasetIO object: SnapOlciHighrocL2NetcdfInputProcessor() """
-    register_input_processor(CMEMSInputProcessor())
-    register_input_processor(SnapOlciHighrocL2InputProcessor())
-    register_input_processor(SnapOlciCyanoAlertL2InputProcessor())
