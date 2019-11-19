@@ -85,13 +85,15 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
 
-    def get_spatial_subest(self, dataset: xr.Dataset, dst_region: Tuple[float, float, float, float]):
+    def get_spatial_subset(self, dataset: xr.Dataset, dst_region: Tuple[float, float, float, float]):
         lon_min, lat_min, lon_max, lat_max = dst_region
         dataset_subset = dataset.copy()
         dataset_subset.coords['x'] = xr.DataArray(np.arange(0, dataset.x.size), dims='x')
         dataset_subset.coords['y'] = xr.DataArray(np.arange(0, dataset.y.size), dims='y')
-        lon_subset = dataset_subset.lon.where((dataset_subset.lon >= lon_min) & (dataset_subset.lon <= lon_max), drop=True)
-        lat_subset = dataset_subset.lat.where((dataset_subset.lat >= lat_min) & (dataset_subset.lat <= lat_max), drop=True)
+        lon_subset = dataset_subset.lon.where((dataset_subset.lon >= lon_min) & (dataset_subset.lon <= lon_max),
+                                              drop=True)
+        lat_subset = dataset_subset.lat.where((dataset_subset.lat >= lat_min) & (dataset_subset.lat <= lat_max),
+                                              drop=True)
         x1 = lon_subset.x[0]
         x2 = lon_subset.x[-1]
         y1 = lat_subset.y[0]
