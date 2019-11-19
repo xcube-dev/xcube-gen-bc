@@ -1,7 +1,7 @@
 # xcube-gen-bc changes
 
 ## Changes
-
+* Added function for making a spatial subset before reprojecting for `SnapNetcdfInputProcessor`
 * Added new input processor `CMEMSInputProcessor` to read daily or hourly input data provided by CEMEMS.
 * Added input processor parameter `xy_gcp_step` to configure the number of 
   ground control points when re-projecting from satellite coordinates to WGS 84. (#7)
