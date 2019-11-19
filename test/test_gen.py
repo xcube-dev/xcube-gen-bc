@@ -61,6 +61,11 @@ class SnapProcessTest(unittest.TestCase):
                                         output_writer='zarr',
                                         append_mode=True)
         self.assertEqual(True, status)
+        ds = xr.open_zarr('l2c.zarr')
+        self.assertGreaterEqual(ds.lon.min(), 0)
+        self.assertLessEqual(ds.lon.max(), 5)
+        self.assertGreaterEqual(ds.lat.min(), 50)
+        self.assertLessEqual(ds.lat.max(), 52.5)
 
     def test_process_inputs_cmems_daily_nc(self):
         status = process_inputs_wrapper(
@@ -74,6 +79,10 @@ class SnapProcessTest(unittest.TestCase):
         self.assertEqual('2017-11-10T12:00:00.000000000', str(ds.time[0].values))
         self.assertEqual('2017-11-11T00:00:00.000000000', ds.attrs['time_coverage_end'])
         self.assertEqual('2017-11-10T00:00:00.000000000', ds.attrs['time_coverage_start'])
+        self.assertGreaterEqual(ds.lon.min(), 0)
+        self.assertLessEqual(ds.lon.max(), 5)
+        self.assertGreaterEqual(ds.lat.min(), 50)
+        self.assertLessEqual(ds.lat.max(), 52.5)
 
     def test_process_inputs_cmems_hourly_nc(self):
         status = process_inputs_wrapper(

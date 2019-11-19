@@ -1,6 +1,7 @@
 import unittest
 
 from test.sampledata import create_highroc_dataset
+import xarray as xr
 from xcube_gen_bc.iproc import CMEMSInputProcessor, SnapOlciCyanoAlertL2InputProcessor, SnapOlciHighrocL2InputProcessor
 
 

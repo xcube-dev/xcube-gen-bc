@@ -85,6 +85,22 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
 
+    def get_spatial_subest(self, dataset: xr.Dataset, dst_region: Tuple[float, float, float, float]):
+        lon_min, lat_min, lon_max, lat_max = dst_region
+        dataset_subset = dataset.copy()
+        dataset_subset.coords['x'] = xr.DataArray(np.arange(0, dataset.x.size), dims='x')
+        dataset_subset.coords['y'] = xr.DataArray(np.arange(0, dataset.y.size), dims='y')
+        lon_subset = dataset_subset.lon.where((dataset_subset.lon >= lon_min) & (dataset_subset.lon <= lon_max), drop=True)
+        lat_subset = dataset_subset.lat.where((dataset_subset.lat >= lat_min) & (dataset_subset.lat <= lat_max), drop=True)
+        x1 = lon_subset.x[0]
+        x2 = lon_subset.x[-1]
+        y1 = lat_subset.y[0]
+        y2 = lat_subset.y[-1]
+        x1, y1, x2, y2 = tuple(map(int, (x1, y1, x2, y2)))
+        final_dataset_subset = dataset_subset.isel(x=slice(x1, x2 + 1), y=slice(y1, y2 + 1))
+
+        return final_dataset_subset
+
     def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
         def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
             # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
