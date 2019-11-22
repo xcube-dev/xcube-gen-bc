@@ -2,6 +2,7 @@
 
 ## Changes
 
+* Code adjustment to suit xarray 0.14.1. 
 * Added new input processor `CMEMSInputProcessor` to read daily or hourly input data provided by CEMEMS.
 * Added input processor parameter `xy_gcp_step` to configure the number of 
   ground control points when re-projecting from satellite coordinates to WGS 84. (#7)
