@@ -31,11 +31,10 @@ install:
   - conda list
   - python setup.py install
   - cd ..
-  - git clone https://github.com/dcs4cop/xcube-gen-bc.git
+  - git clone --branch=$TRAVIS_BRANCH https://github.com/dcs4cop/xcube-gen-bc.git
   - cd xcube-gen-bc
   - python setup.py install
   
-  - pytest
   - py.test -v --cov=xcube
 
 after_success:
