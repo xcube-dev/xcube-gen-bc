@@ -33,6 +33,7 @@ class SnapProcessTest(unittest.TestCase):
         self.assertEqual(True, status)
 
     def test_process_inputs_append_multiple_nc(self):
+
         status = process_inputs_wrapper(input_path=[get_inputdata_file('O_L2_0001_SNS_2017104102450_v1.0.nc'),
                                                     get_inputdata_file('O_L2_0001_SNS_2017105095839_v1.0.nc'),
                                                     get_inputdata_file('O_L2_0001_SNS_2017105100139_v1.0.nc')],

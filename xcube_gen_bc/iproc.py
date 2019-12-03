@@ -25,7 +25,7 @@ from typing import Tuple
 import numpy as np
 import xarray as xr
 from xcube.constants import CRS_WKT_EPSG_4326
-from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor
+from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _check_bounding_box
 from xcube.core.timecoord import to_time_in_days_since_1970
 
 from .transexpr import translate_snap_expr_attributes
@@ -80,8 +80,25 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         t2 = to_time_in_days_since_1970(t2)
         return t1, t2
 
-    def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
+    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float]) -> xr.Dataset:
         """ Do any pre-processing before reprojection. """
+        lon_min, lat_min, lon_max, lat_max = output_region
+        if output_region:
+            make_subset = _check_bounding_box(dataset, output_region)
+            if make_subset:
+                dataset_subset = dataset.copy()
+                dataset_subset.coords['x'] = xr.DataArray(np.arange(0, dataset.x.size), dims='x')
+                dataset_subset.coords['y'] = xr.DataArray(np.arange(0, dataset.y.size), dims='y')
+                lon_subset = dataset_subset.lon.where((dataset_subset.lon >= lon_min) & (dataset_subset.lon <= lon_max),
+                                                      drop=True)
+                lat_subset = dataset_subset.lat.where((dataset_subset.lat >= lat_min) & (dataset_subset.lat <= lat_max),
+                                                      drop=True)
+                x1 = lon_subset.x[0]
+                x2 = lon_subset.x[-1]
+                y1 = lat_subset.y[0]
+                y2 = lat_subset.y[-1]
+                x1, y1, x2, y2 = tuple(map(int, (x1, y1, x2, y2)))
+                dataset = dataset_subset.isel(x=slice(x1, x2 + 1), y=slice(y1, y2 + 1))
         return translate_snap_expr_attributes(dataset)
 
     # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
