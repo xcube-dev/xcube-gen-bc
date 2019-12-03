@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 # The MIT License (MIT)
-# Copyright (c) 2018 by Brockmann Consult GmbH
+# Copyright (c) 2019 by the xcube development team and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -21,21 +19,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from xcube.constants import EXTENSION_POINT_INPUT_PROCESSORS
+from xcube.util import extension
 
-from setuptools import setup, find_packages
 
-requirements = [
-    'xcube'
-]
-
-packages = find_packages(exclude=["test", "test.*"])
-
-setup(
-    name="xcube-gen-bc",
-    version='0.3.0.dev0',
-    description='xcube input processor for data provided by Brockmann Consult',
-    license='MIT',
-    author='xcube Development Team',
-    packages=packages,
-    install_requires=requirements,
-)
+def init_plugin(ext_registry: extension.ExtensionRegistry):
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciHighrocL2InputProcessor', call=True),
+        point=EXTENSION_POINT_INPUT_PROCESSORS,
+        name='snap-olci-highroc-l2',
+        description='SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs'
+    )
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciCyanoAlertL2InputProcessor', call=True),
+        point=EXTENSION_POINT_INPUT_PROCESSORS,
+        name='snap-olci-cyanoalert-l2',
+        description='SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
+    )
