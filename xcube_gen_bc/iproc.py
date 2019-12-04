@@ -26,8 +26,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from xcube.constants import CRS_WKT_EPSG_4326
-from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _check_bounding_box
-from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360
+from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360, _check_bounding_box
 from xcube.core.timecoord import to_time_in_days_since_1970
 
 from .transexpr import translate_snap_expr_attributes
