@@ -36,3 +36,9 @@ def init_plugin(ext_registry: extension.ExtensionRegistry):
         name='snap-olci-cyanoalert-l2',
         description='SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
     )
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:CMEMSInputProcessor', call=True),
+        point=EXTENSION_POINT_INPUT_PROCESSORS,
+        name='cmems',
+        description='Single-scene daily or hourly CMEMS NetCDF/CF inputs'
+    )

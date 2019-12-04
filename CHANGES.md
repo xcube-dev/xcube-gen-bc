@@ -1,7 +1,9 @@
 # xcube-gen-bc changes
 
 ## Changes
-* Added abstract method for retrieving the time stamp of a dataset for sorting input paths in xcube gen
+
+* Code adjustment to suit xarray 0.14.1. 
+* Added new input processor `CMEMSInputProcessor` to read daily or hourly input data provided by CEMEMS.
 * Added input processor parameter `xy_gcp_step` to configure the number of 
   ground control points when re-projecting from satellite coordinates to WGS 84. (#7)
   To use every 10th value in x and y direction of the `lon` and `lat` 2D coordinate 
