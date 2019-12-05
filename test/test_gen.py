@@ -31,6 +31,7 @@ class SnapProcessTest(unittest.TestCase):
                                         input_processor_name='snap-olci-highroc-l2',
                                         output_path='l2c-single.nc',
                                         output_writer='netcdf4',
+                                        output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)],
                                         append_mode=False)
         self.assertEqual(True, status)
 
@@ -41,6 +42,7 @@ class SnapProcessTest(unittest.TestCase):
                                                     get_inputdata_file('O_L2_0001_SNS_2017105100139_v1.0.nc')],
                                         input_processor_name='snap-olci-highroc-l2',
                                         output_path='l2c.nc',
+                                        output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)],
                                         output_writer='netcdf4',
                                         append_mode=True)
         self.assertEqual(True, status)
@@ -51,6 +53,7 @@ class SnapProcessTest(unittest.TestCase):
                                    input_processor_name='snap-olci-highroc-l2',
                                    output_path='l2c.nc',
                                    output_writer='netcdf4',
+                                   output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)],
                                    append_mode=True, monitor=print, no_sort_mode=False)
             self.assertEqual(output.getvalue()[-69:],
                              '3 of 3 datasets processed successfully, 0 were dropped due to errors\n')
@@ -60,9 +63,13 @@ class SnapProcessTest(unittest.TestCase):
                                         input_processor_name='snap-olci-highroc-l2',
                                         output_path='l2c.zarr',
                                         output_writer='zarr',
+                                        output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)],
                                         append_mode=True)
         self.assertEqual(True, status)
-
+        ds = xr.open_zarr('l2c.zarr')
+        self.assertEqual('2017-04-14T10:27:39.819000320', str(ds.time[0].values))
+        self.assertEqual('2017-04-15T10:01:37.405000192', str(ds.time[1].values))
+        self.assertEqual('2017-04-15T10:01:57.892000256', str(ds.time[2].values))
 
     def test_process_inputs_cmems_daily_nc(self):
         status = process_inputs_wrapper(
@@ -98,6 +105,7 @@ def process_inputs_wrapper(input_path=None,
                            input_processor_name=None,
                            output_path=None,
                            output_writer='netcdf4',
+                           output_variables=None,
                            append_mode=False,
                            no_sort_mode=False,
                            monitor=None):
@@ -105,5 +113,5 @@ def process_inputs_wrapper(input_path=None,
                     output_region=(0., 50., 5., 52.5),
                     output_size=(2000, 1000), output_resampling='Nearest', output_path=output_path,
                     output_writer_name=output_writer,
-                    output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)], append_mode=append_mode,
+                    output_variables=output_variables, append_mode=append_mode,
                     no_sort_mode=no_sort_mode, dry_run=False, monitor=monitor)

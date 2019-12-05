@@ -25,10 +25,10 @@ from typing import Tuple, Union
 import numpy as np
 import pandas as pd
 import xarray as xr
-from xcube.constants import CRS_WKT_EPSG_4326
-from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360, _check_bounding_box
-from xcube.core.timecoord import to_time_in_days_since_1970
 
+from xcube.constants import CRS_WKT_EPSG_4326
+from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _check_bounding_box, _normalize_lon_360
+from xcube.core.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import new_band_coord_var, vectorize_wavebands
 
@@ -81,7 +81,8 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         t2 = to_time_in_days_since_1970(t2)
         return t1, t2
 
-    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[xr.Dataset, bool]:
+    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[
+        xr.Dataset, bool]:
         """ Do any pre-processing before reprojection. """
         if output_region:
             make_subset = _check_bounding_box(dataset, output_region)
@@ -163,7 +164,8 @@ class CMEMSInputProcessor(XYInputProcessor):
     def input_reader(self) -> str:
         return self._input_reader
 
-    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[xr.Dataset, bool]:
+    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[
+        xr.Dataset, bool]:
         if 'longitude' in dataset.dims:
             dataset = dataset.rename(({'longitude': 'lon'}))
 
