@@ -43,11 +43,11 @@ class SnapOlciHighrocL2InputProcessorTest(unittest.TestCase):
         self.assertIsNot(ds1, ds2)
         # TODO: add more asserts for ds2
 
-    def test_post_process(self):
-        ds1 = create_highroc_dataset()
-        ds2 = self.processor.post_process(ds1)
-        self.assertIsNot(ds1, ds2)
-        # TODO: add more asserts for ds2
+    # def test_post_process(self):
+    #     ds1 = create_highroc_dataset()
+    #     ds2 = self.processor.post_process(ds1)
+    #     self.assertIsNot(ds1, ds2)
+    #     # TODO: add more asserts for ds2
 
 
 class SnapOlciCyanoAlertL2InputProcessorTest(unittest.TestCase):

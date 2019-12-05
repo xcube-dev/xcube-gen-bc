@@ -63,6 +63,7 @@ class SnapProcessTest(unittest.TestCase):
                                         append_mode=True)
         self.assertEqual(True, status)
 
+
     def test_process_inputs_cmems_daily_nc(self):
         status = process_inputs_wrapper(
             input_path=[get_inputdata_file('OCEANCOLOUR_ATL_CHL_L4_REP_OBSERVATIONS_009_098-TDS-2017-11-10.nc')],

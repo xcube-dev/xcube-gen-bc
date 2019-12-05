@@ -20,7 +20,7 @@
 # SOFTWARE.
 import datetime
 from abc import ABCMeta
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -81,13 +81,13 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         t2 = to_time_in_days_since_1970(t2)
         return t1, t2
 
-    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float]) -> xr.Dataset:
+    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[xr.Dataset, bool]:
         """ Do any pre-processing before reprojection. """
-        lon_min, lat_min, lon_max, lat_max = output_region
         if output_region:
             make_subset = _check_bounding_box(dataset, output_region)
             if make_subset:
                 dataset_subset = dataset.copy()
+                lon_min, lat_min, lon_max, lat_max = output_region
                 dataset_subset.coords['x'] = xr.DataArray(np.arange(0, dataset.x.size), dims='x')
                 dataset_subset.coords['y'] = xr.DataArray(np.arange(0, dataset.y.size), dims='y')
                 lon_subset = dataset_subset.lon.where((dataset_subset.lon >= lon_min) & (dataset_subset.lon <= lon_max),
@@ -100,6 +100,9 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
                 y2 = lat_subset.y[-1]
                 x1, y1, x2, y2 = tuple(map(int, (x1, y1, x2, y2)))
                 dataset = dataset_subset.isel(x=slice(x1, x2 + 1), y=slice(y1, y2 + 1))
+            if make_subset is None:
+                monitor(f"The output region is not within the bounds of the dataset. Skipping ...")
+                return False
         return translate_snap_expr_attributes(dataset)
 
     # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
@@ -160,7 +163,7 @@ class CMEMSInputProcessor(XYInputProcessor):
     def input_reader(self) -> str:
         return self._input_reader
 
-    def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
+    def pre_process(self, dataset: xr.Dataset, output_region: Tuple[float, float, float, float], monitor) -> Union[xr.Dataset, bool]:
         if 'longitude' in dataset.dims:
             dataset = dataset.rename(({'longitude': 'lon'}))
 
@@ -172,8 +175,21 @@ class CMEMSInputProcessor(XYInputProcessor):
         if "time" in dataset:
             # Remove time dimension of length 1.
             dataset = dataset.squeeze("time")
-
-        return _normalize_lon_360(dataset)
+        dataset = _normalize_lon_360(dataset)
+        if output_region:
+            make_subset = _check_bounding_box(dataset, output_region)
+            if make_subset:
+                # needs to be implemented
+                dataset = dataset
+                # dataset_subset = dataset.copy()
+                # lon_min, lat_min, lon_max, lat_max = output_region
+                # dataset = dataset_subset.where((lon_min < dataset_subset.lon) & (dataset_subset.lon < lon_max)
+                #                                & (lat_min < dataset_subset.lat) & (dataset_subset.lat < lat_max),
+                #                                drop=True)
+            if make_subset is None:
+                monitor(f"The output region is not within the bounds of the dataset. Skipping ...")
+                return False
+        return dataset
 
     def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
         return ReprojectionInfo(xy_var_names=('lon', 'lat'),
