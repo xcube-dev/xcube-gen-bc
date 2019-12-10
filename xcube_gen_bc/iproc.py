@@ -101,6 +101,10 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
                 y2 = lat_subset.y[-1]
                 x1, y1, x2, y2 = tuple(map(int, (x1, y1, x2, y2)))
                 dataset = dataset_subset.isel(x=slice(x1, x2 + 1), y=slice(y1, y2 + 1))
+                if lon_max <= dataset.lon.min() or lon_min >= dataset.lon.max() \
+                        or lat_max <= dataset.lat.min() or lat_min >= dataset.lat.max():
+                    monitor(f"The output region is not within the bounds of the dataset. Skipping ...")
+                    return False
             if make_subset is None:
                 monitor(f"The output region is not within the bounds of the dataset. Skipping ...")
                 return False

@@ -83,6 +83,7 @@ class SnapProcessTest(unittest.TestCase):
         self.assertEqual('2017-11-10T12:00:00.000000000', str(ds.time[0].values))
         self.assertEqual('2017-11-11T00:00:00.000000000', ds.attrs['time_coverage_end'])
         self.assertEqual('2017-11-10T00:00:00.000000000', ds.attrs['time_coverage_start'])
+        self.assertIn('CHL', ds.variables)
 
     def test_process_inputs_cmems_hourly_nc(self):
         status = process_inputs_wrapper(
