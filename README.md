@@ -3,7 +3,7 @@
 
 # xcube-gen-bc
 
-This is a plugin for xcube which can be used for processing inputdata provided by RBINS. 
+This is a plugin for xcube which can be used for processing inputdata provided by BC. 
 With xcube-gen-bc all features of xcube can be used. 
 In order to use the xcube-gen-bc you need to install xcube first: 
 
