@@ -63,7 +63,7 @@ def vectorize_wavebands(dataset: xr.Dataset,
     dropped_var_names = {spectrum_variable.name
                          for _, _, _, spectrum_variables in band_list
                          for spectrum_variable in spectrum_variables}
-    dataset = dataset.drop(dropped_var_names)
+    dataset = dataset.drop_vars(dropped_var_names)
 
     # And replace by new vectorized waveband / spectrum variables
     for band_values, band_dim_index, spectrum_name, spectrum_variables in band_list:
