@@ -21,6 +21,10 @@ class TranslateExprTest(unittest.TestCase):
         self.assertEqual(translate_snap_expr('a | b'), 'a|b')
         self.assertEqual(translate_snap_expr('!nan(kd489)'), 'not isnan(kd489)')
         self.assertEqual(translate_snap_expr('sqrt(x^2 + y^2)'), 'sqrt(x**2+y**2)')
+        # In order to deal with SNAP conditional expr, we tokenize '?' to 'if' and ':' to 'else'
+        # so we use a syntactically valid Python expression. However we will need a special
+        # treatment because the semantic isn't right that way:
+        self.assertEqual(translate_snap_expr('a < 0 ? 0 : a > 1 ? 1 : a'), 'a<0 if 0 else a>1 if 1 else a')
 
 
 class TokenizeExprTest(unittest.TestCase):
