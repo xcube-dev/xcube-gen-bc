@@ -25,19 +25,19 @@ from xcube.util import extension
 
 def init_plugin(ext_registry: extension.ExtensionRegistry):
     ext_registry.add_extension(
-        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciHighrocL2InputProcessor', call=True),
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciHighrocL2InputProcessor'),
         point=EXTENSION_POINT_INPUT_PROCESSORS,
         name='snap-olci-highroc-l2',
         description='SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs'
     )
     ext_registry.add_extension(
-        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciCyanoAlertL2InputProcessor', call=True),
+        loader=extension.import_component('xcube_gen_bc.iproc:SnapOlciCyanoAlertL2InputProcessor'),
         point=EXTENSION_POINT_INPUT_PROCESSORS,
         name='snap-olci-cyanoalert-l2',
         description='SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs'
     )
     ext_registry.add_extension(
-        loader=extension.import_component('xcube_gen_bc.iproc:CMEMSInputProcessor', call=True),
+        loader=extension.import_component('xcube_gen_bc.iproc:CMEMSInputProcessor'),
         point=EXTENSION_POINT_INPUT_PROCESSORS,
         name='cmems',
         description='Single-scene daily or hourly CMEMS NetCDF/CF inputs'

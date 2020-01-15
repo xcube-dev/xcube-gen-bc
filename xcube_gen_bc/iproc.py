@@ -20,15 +20,15 @@
 # SOFTWARE.
 import datetime
 from abc import ABCMeta
-from typing import Tuple
+from typing import Tuple, Dict, Any
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+
 from xcube.constants import CRS_WKT_EPSG_4326
 from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360
 from xcube.core.timecoord import to_time_in_days_since_1970
-
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import new_band_coord_var, vectorize_wavebands
 
@@ -38,34 +38,17 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     Input processor for SNAP L2 NetCDF inputs.
     """
 
-    def __init__(self, name: str):
-        super().__init__(name)
-        self.xy_gcp_step = None
-
     @property
-    def input_reader(self) -> str:
-        return 'netcdf4'
-
-    @property
-    def input_reader_params(self) -> dict:
-        return dict(decode_cf=True, decode_coords=True, decode_times=False)
-
-    def configure(self, **parameters):
-        if 'xy_gcp_step' in parameters:
-            xy_gcp_step = parameters.pop('xy_gcp_step')
-            if xy_gcp_step is not None:
-                if not isinstance(xy_gcp_step, int):
-                    raise ValueError("input processor parameter 'xy_gcp_step' must be an integer number")
-                if xy_gcp_step <= 0:
-                    raise ValueError("input processor parameter 'xy_gcp_step' must be greater than zero")
-            self.xy_gcp_step = xy_gcp_step
-        super().configure(**parameters)
-
-    def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
-        return ReprojectionInfo(xy_var_names=('lon', 'lat'),
-                                xy_tp_var_names=('TP_longitude', 'TP_latitude'),
-                                xy_crs=CRS_WKT_EPSG_4326,
-                                xy_gcp_step=self.xy_gcp_step or 5)
+    def default_parameters(self) -> Dict[str, Any]:
+        default_parameters = super().default_parameters
+        default_parameters.update(input_reader='netcdf4',
+                                  input_reader_params=dict(decode_cf=True,
+                                                           decode_coords=True,
+                                                           decode_times=False),
+                                  xy_names=('lon', 'lat'),
+                                  xy_tp_names=('TP_longitude', 'TP_latitude'),
+                                  xy_crs=CRS_WKT_EPSG_4326)
+        return default_parameters
 
     def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
 
@@ -101,8 +84,8 @@ class SnapOlciHighrocL2InputProcessor(SnapNetcdfInputProcessor):
     Input processor for SNAP Sentinel-3 OLCI HIGHROC Level-2 NetCDF inputs.
     """
 
-    def __init__(self):
-        super().__init__('snap-olci-highroc-l2')
+    def __init__(self, **parameters):
+        super().__init__('snap-olci-highroc-l2', **parameters)
 
 
 # noinspection PyAbstractClass
@@ -111,13 +94,13 @@ class SnapOlciCyanoAlertL2InputProcessor(SnapNetcdfInputProcessor):
     Input processor for SNAP Sentinel-3 OLCI CyanoAlert Level-2 NetCDF inputs.
     """
 
-    def __init__(self):
-        super().__init__('snap-olci-cyanoalert-l2')
+    def __init__(self, **parameters):
+        super().__init__('snap-olci-cyanoalert-l2', **parameters)
 
 
 class CMEMSInputProcessor(XYInputProcessor):
     """
-    CEMES input processor that expects input datasets that do not have time bounds:
+    CMEMS input processor that expects input datasets that do not have time bounds:
 
     * Have dimensions ``lat``, ``lon`` and ``time`` of length 1;
     * have coordinate variables ``lat[lat]``, ``lon[lat]``, ``time[time]``;
@@ -132,16 +115,21 @@ class CMEMSInputProcessor(XYInputProcessor):
 
     """
 
-    def __init__(self):
-        super().__init__('cmems')
-        self._input_reader = 'netcdf4'
-
-    def configure(self, input_reader: str = 'netcdf4'):
-        self._input_reader = input_reader
+    def __init__(self, **parameters):
+        super().__init__('cmems', **parameters)
 
     @property
-    def input_reader(self) -> str:
-        return self._input_reader
+    def default_parameters(self) -> Dict[str, Any]:
+        default_parameters = super().default_parameters
+        default_parameters.update(input_reader='netcdf4',
+                                  xy_crs=CRS_WKT_EPSG_4326)
+        return default_parameters
+
+    def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
+        return super().get_reprojection_info(dataset).derive(
+            xy_gcp_step=(max(1, len(dataset.lon) // 4),
+                         max(1, len(dataset.lat) // 4))
+        )
 
     def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
         if 'longitude' in dataset.dims:
@@ -157,12 +145,6 @@ class CMEMSInputProcessor(XYInputProcessor):
             dataset = dataset.squeeze("time")
 
         return _normalize_lon_360(dataset)
-
-    def get_reprojection_info(self, dataset: xr.Dataset) -> ReprojectionInfo:
-        return ReprojectionInfo(xy_var_names=('lon', 'lat'),
-                                xy_crs=CRS_WKT_EPSG_4326,
-                                xy_gcp_step=(max(1, len(dataset.lon) // 4),
-                                             max(1, len(dataset.lat) // 4)))
 
     def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
         time_coverage_start, time_coverage_end = None, None
