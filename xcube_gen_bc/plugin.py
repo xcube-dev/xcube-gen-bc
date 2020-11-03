@@ -42,3 +42,9 @@ def init_plugin(ext_registry: extension.ExtensionRegistry):
         name='cmems',
         description='Single-scene daily or hourly CMEMS NetCDF/CF inputs'
     )
+    ext_registry.add_extension(
+        loader=extension.import_component('xcube_gen_bc.iproc:BCS2InputProcessor'),
+        point=EXTENSION_POINT_INPUT_PROCESSORS,
+        name='bc-s2-l2',
+        description='BC Sentinel-2 Level 2 NetCDF inputs'
+    )

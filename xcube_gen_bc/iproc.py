@@ -27,7 +27,7 @@ import pandas as pd
 import xarray as xr
 
 from xcube.constants import CRS_WKT_EPSG_4326
-from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360
+from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360, DefaultInputProcessor
 from xcube.core.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
 from .vectorize import new_band_coord_var, vectorize_wavebands
@@ -68,14 +68,14 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
 
-    def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
-        def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
-            # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
-            if band_values[-2] == band_values[-1] and band_values[-1] == 940.:
-                band_values[-1] = 1020.
-            return new_band_coord_var(band_dim_name, band_values)
-
-        return vectorize_wavebands(dataset, new_band_coord_var_ex)
+    # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
+    #     def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
+    #         # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
+    #         if band_values[-2] == band_values[-1] and band_values[-1] == 940.:
+    #             band_values[-1] = 1020.
+    #         return new_band_coord_var(band_dim_name, band_values)
+    #
+    #     return vectorize_wavebands(dataset, new_band_coord_var_ex)
 
 
 # noinspection PyAbstractClass
@@ -194,3 +194,21 @@ class CMEMSInputProcessor(XYInputProcessor):
                 raise ValueError(f'coordinate variable "{coord_var_name}" must have at least {min_length} value(s)')
             if max_length is not None and len(coord_var) > max_length:
                 raise ValueError(f'coordinate variable "{coord_var_name}" must have no more than {max_length} value(s)')
+
+
+class BCS2InputProcessor(XYInputProcessor):
+    """
+    Input processor for BC's Sentinel-2  Level-2 NetCDF inputs.
+    """
+
+    def __init__(self, **parameters):
+        super().__init__('vito-s2plus-l2', **parameters)
+
+    @property
+    def default_parameters(self) -> Dict[str, Any]:
+        default_parameters = super().default_parameters
+        default_parameters.update(input_reader='netcdf4')
+        return default_parameters
+
+    def get_time_range(self, dataset: xr.Dataset) -> Tuple[float, float]:
+        return DefaultInputProcessor().get_time_range(dataset)

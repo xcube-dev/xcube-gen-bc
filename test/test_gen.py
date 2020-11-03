@@ -90,6 +90,21 @@ class SnapProcessTest(unittest.TestCase):
         self.assertIn('lon', ds.dims)
         self.assertIn('lat', ds.dims)
 
+    def test_process_bc_s2_inputs_single(self):
+        status = gen_cube(
+            input_paths=[get_inputdata_file('S2A_MSIL1C_20150929T100016_N0204_R122_T34VCK_20150929T100239.nc')],
+            input_processor_name='bc-s2-l2',
+            output_path='l2c-single.zarr',
+            output_variables=[('conc_chl', (None)),
+                              ('conc_tsm', (None)),
+                              ('rhow_B4', (None))],
+            output_resampling='Nearest',
+            output_region=(17.5, 57.6, 19.4, 58.6),
+            no_sort_mode=False, dry_run=False, monitor=None,
+            output_writer_name='zarr')
+        self.assertEqual(True, status)
+        ds = xr.open_zarr('l2c-single.zarr')
+        self.assertEqual('2015-09-29T10:00:16.027000064', str(ds.time[0].values))
 
 # noinspection PyShadowingBuiltins
 def process_inputs_wrapper(input_path=None,
@@ -103,5 +118,5 @@ def process_inputs_wrapper(input_path=None,
                     output_region=(0., 50., 5., 52.5),
                     output_size=(2000, 1000), output_resampling='Nearest', output_path=output_path,
                     output_writer_name=output_writer,
-                    output_variables=[('conc_chl', None), ('conc_tsm', None), ('kd489', None)], append_mode=append_mode,
+                    output_variables=[('conc_chl', None), ('conc_tsm', None)], append_mode=append_mode,
                     no_sort_mode=no_sort_mode, dry_run=False, monitor=monitor)
