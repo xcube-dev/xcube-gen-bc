@@ -101,6 +101,7 @@ class SnapProcessTest(unittest.TestCase):
         self.assertIn('lon', ds.dims)
         self.assertIn('lat', ds.dims)
 
+    # the data used for the test below is also located in /fs1/temp/forAlicja/CyanoAlertUnitTestData/
     @unittest.skipUnless(sentinel2_products_exist(bc_s2_path), f'missing BC Sentinel-2 products in {bc_s2_path}')
     def test_process_bc_s2_inputs(self):
         status = process_inputs_wrapper(
