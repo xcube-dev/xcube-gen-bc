@@ -68,6 +68,7 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
 
+    # Commented lines below, because post-process currently is not needed and cannot be disabled by flag yet
     # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
     #     def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
     #         # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
@@ -202,7 +203,7 @@ class BCS2InputProcessor(XYInputProcessor):
     """
 
     def __init__(self, **parameters):
-        super().__init__('vito-s2plus-l2', **parameters)
+        super().__init__('bc-s2-l2', **parameters)
 
     @property
     def default_parameters(self) -> Dict[str, Any]:

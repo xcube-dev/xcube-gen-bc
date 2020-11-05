@@ -1,7 +1,8 @@
 import unittest
 
 from test.sampledata import create_highroc_dataset
-from xcube_gen_bc.iproc import CMEMSInputProcessor, SnapOlciCyanoAlertL2InputProcessor, SnapOlciHighrocL2InputProcessor
+from xcube_gen_bc.iproc import CMEMSInputProcessor, SnapOlciCyanoAlertL2InputProcessor, SnapOlciHighrocL2InputProcessor, \
+    BCS2InputProcessor
 
 
 class SnapOlciHighrocL2InputProcessorTest(unittest.TestCase):
@@ -52,5 +53,17 @@ class CMEMSInputProcessorTest(unittest.TestCase):
     def test_props(self):
         self.assertEqual('cmems', self.processor.name)
         self.assertEqual('Single-scene daily or hourly CMEMS NetCDF/CF inputs',
+                         self.processor.description)
+        self.assertEqual('netcdf4', self.processor.input_reader)
+
+
+class BCS2InputProcessorTest(unittest.TestCase):
+
+    def setUp(self):
+        self.processor = BCS2InputProcessor()
+
+    def test_props(self):
+        self.assertEqual('bc-s2-l2', self.processor.name)
+        self.assertEqual('BC Sentinel-2 Level 2 NetCDF inputs',
                          self.processor.description)
         self.assertEqual('netcdf4', self.processor.input_reader)
