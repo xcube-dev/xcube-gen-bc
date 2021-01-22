@@ -1,7 +1,9 @@
 # xcube-gen-bc changes
 
 ## Changes
-
+* Added new input processor `BCS2InputProcessor` which is able to process Sentinel-2 data processed 
+  and provided by Brockmann Consult
+* removed vecorize.py module, because it has no usage anymore  
 * Added new input processor `CMEMSInputProcessor` to read daily or hourly input data provided by CEMEMS.
 * Added input processor parameter `xy_gcp_step` to configure the number of 
   ground control points when re-projecting from satellite coordinates to WGS 84. (#7)
