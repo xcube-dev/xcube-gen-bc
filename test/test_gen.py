@@ -21,7 +21,7 @@ def clean_up():
 
 def sentinel2_products_exist(path: str) -> bool:
     """
-    Test if given *path* is likely a Sentinel-3 product path.
+    Test if given *path* is likely a Sentinel-2 product path.
 
     :param path: (directory) path
     :return: True, if so
