@@ -28,7 +28,7 @@ def sentinel2_products_exist(path: str) -> bool:
     """
     if os.path.isdir(path):
         for fname in os.listdir(path):
-            if fname.endswith('.nc'):
+            if fname.endswith('.nc') and fname.startswith('S2'):
                 return True
     else:
         return False

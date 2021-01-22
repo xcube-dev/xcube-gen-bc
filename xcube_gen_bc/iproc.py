@@ -22,7 +22,6 @@ import datetime
 from abc import ABCMeta
 from typing import Tuple, Dict, Any
 
-import numpy as np
 import pandas as pd
 import xarray as xr
 
@@ -30,7 +29,6 @@ from xcube.constants import CRS_WKT_EPSG_4326
 from xcube.core.gen.iproc import ReprojectionInfo, XYInputProcessor, _normalize_lon_360, DefaultInputProcessor
 from xcube.core.timecoord import to_time_in_days_since_1970
 from .transexpr import translate_snap_expr_attributes
-from .vectorize import new_band_coord_var, vectorize_wavebands
 
 
 class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
@@ -67,16 +65,6 @@ class SnapNetcdfInputProcessor(XYInputProcessor, metaclass=ABCMeta):
     def pre_process(self, dataset: xr.Dataset) -> xr.Dataset:
         """ Do any pre-processing before reprojection. """
         return translate_snap_expr_attributes(dataset)
-
-    # Commented lines below, because post-process currently is not needed and cannot be disabled by flag yet
-    # def post_process(self, dataset: xr.Dataset) -> xr.Dataset:
-    #     def new_band_coord_var_ex(band_dim_name: str, band_values: np.ndarray) -> xr.DataArray:
-    #         # Bug in HIGHROC OLCI L2 data: both bands 20 and 21 have wavelengths at 940 nm
-    #         if band_values[-2] == band_values[-1] and band_values[-1] == 940.:
-    #             band_values[-1] = 1020.
-    #         return new_band_coord_var(band_dim_name, band_values)
-    #
-    #     return vectorize_wavebands(dataset, new_band_coord_var_ex)
 
 
 # noinspection PyAbstractClass
